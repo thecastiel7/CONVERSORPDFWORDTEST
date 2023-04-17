@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversor de Arquivos</title>
+    <style>
+        /* Estilos CSS aqui */
+        body {
+            font-family: sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        input[type="file"] {
+            display: block;
+        }
+        .progress {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4caf50;
+            transition: width 0.3s;
+        }
+        .result-container {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .result-container a {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conversor de Arquivos</h1>
+        <form id="upload-form">
+            <div class="form-group">
+                <label for="file-input">Selecione o arquivo:</label>
+                <input type="file" id="file-input" name="file">
+            </div>
+            <button type="submit">Converter</button>
+        </form>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar" style="width: 0;"></div>
+        </div>
+        <div class="result-container" id="result-container">
+            <a href="#" download id="download-link"></a>
+        </div>
+    </div>
+    <script>
+        /* Código JavaScript aqui */
+        const form = document.getElementById('upload-form');
+        const progressBar = document.getElementById('progress-bar');
+        const resultContainer = document.getElementById('result-container');
+        const downloadLink = document.getElementById('download-link');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/convert');
+            xhr.upload.addEventListener('progress', (event) => {
+                const percentComplete = event.loaded / event.total * 100;
+                progressBar.style.width = percentComplete + '%';
+            });
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    resultContainer.style.display = 'block';
+                    downloadLink.href = xhr.response.url;
+                    downloadLink.innerHTML = 'Baixar Arquivo';
+                } else {
+                    alert('Erro ao converter arquivo.');
+                }
+            });
+            xhr.send(formData);
+        });
+    </script>
+</body>
+</html>
